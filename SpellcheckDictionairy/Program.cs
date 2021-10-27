@@ -109,12 +109,14 @@ class Program
         while (lowerIndex <= upperIndex)
         {
             middleIndex = (lowerIndex + upperIndex) / 2;
-            if (anArray[middleIndex] == item)
+            int result = string.Compare(item, anArray[middleIndex]);
+
+            if (result == 0)
             {
                 return middleIndex;
             }
             // Error found here, need to update the method to refrence the dictionary instead of an item
-            else if (anArray[middleIndex] == item)
+            else if (result < 0)
             {
                 upperIndex = middleIndex - 1;
             }
