@@ -8,3 +8,4 @@
 \\fs-059\studuser$\Gr12\s.roy19\Visual Studio 2019\Projects\SpellcheckDictionairy\bin\Debug\netcoreapp3.1\SpellcheckDictionairy.pdb
 \\fs-059\studuser$\Gr12\s.roy19\Visual Studio 2019\Projects\SpellcheckDictionairy\obj\Debug\netcoreapp3.1\SpellcheckDictionairy.dll
 \\fs-059\studuser$\Gr12\s.roy19\Visual Studio 2019\Projects\SpellcheckDictionairy\obj\Debug\netcoreapp3.1\SpellcheckDictionairy.pdb
+\\fs-059\studuser$\Gr12\s.roy19\Visual Studio 2019\Projects\SpellcheckDictionairy\obj\Debug\netcoreapp3.1\SpellcheckDictionairy.csprojAssemblyReference.cache

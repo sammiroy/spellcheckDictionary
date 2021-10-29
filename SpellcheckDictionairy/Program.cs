@@ -1,30 +1,22 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 class Program
 {
     public static void Main(string[] args)
     {
-        // Load data files into arrays
+        // Load Data files as arrays of strings
         String[] dictionary = System.IO.File.ReadAllLines(@"F:\Visual Studio 2019\Projects\SpellcheckDictionairy\data-files\dictionary.txt");
         String aliceText = System.IO.File.ReadAllText(@"F:\Visual Studio 2019\Projects\SpellcheckDictionairy\data-files\AliceInWonderLand.txt");
         String[] aliceWords = Regex.Split(aliceText, @"\s+");
 
-        // Print first 50 values of each list to verify contents
-
-        Console.WriteLine("***DICTIONARY***");
-        printStringArray(dictionary, 0, 50);
-
-        Console.WriteLine("***ALICE WORDS***");
-        printStringArray(aliceWords, 0, 50);
-
-        // Make a menu loop
-        // Init variables
+        // Menu Loop
         bool loop = true;
         while (loop)
         {
             Console.WriteLine(
-                "Main Menu" +
+                "\nMain Menu" +
                 "\n1: Spell Check a Word (Linear)" +
                 "\n2: Spell Check a Word (Binary)" +
                 "\n3: Spell Check Alice in Wonderland (Linear)" +
@@ -33,64 +25,106 @@ class Program
                 );
             Console.Write("Enter Menu Selection (1-5): ");
             int uNum = Convert.ToInt32(Console.ReadLine());
-            ExecuteOption(uNum, dictionary);
-
+            loop = ExecuteOption(uNum, dictionary, aliceWords);
         }
     }
 
-    // Execute user decision
-    public static void ExecuteOption(int num, string[] anArray)
+    // Handel User's Decision
+    public static bool ExecuteOption(int num, string[] dictionary, string[] alice)
     {
-        // def user input variable for option 1 & 2
+        // Define Variables
         string uWord;
+        int badWordCount = 0;
+        int searchResult;
+
+        // Create Stopwatch to tell user how long the program took
+        Stopwatch stopWatch = new Stopwatch();
+
+        // Switch case calls the necessary functions
         switch (num)
         {
-            // Use linearSearch on user's word refrenceing the dictionary
+            // Use LinearSearch method with the dictionary, the user compares their input ot the contents of the dictionary
             case 1:
                 Console.Write("Please enter a word: ");
                 uWord = Console.ReadLine();
-                uWord.ToLower();
-                PrintSuccessFailure(LinearSearch(anArray, uWord));
+                TimeSpan ts1 = stopWatch.Elapsed;
+                Console.WriteLine(ParseResults(LinearSearch(dictionary, uWord.ToLower()), 0, ts1, true));
                 break;
+            // Similar to case #1 but instead using BinarySearch method
             case 2:
-
+                Console.Write("Please enter a word: ");
+                uWord = Console.ReadLine();
+                TimeSpan ts2 = stopWatch.Elapsed;
+                Console.WriteLine(ParseResults(BinarySearch(dictionary, uWord.ToLower()), 0, ts2, true));
                 break;
+            // Use LinearSearch method to compare each word in Alice in wonderland against the dictionary, counting incorrect words
+            case 3:
+                stopWatch.Start();
+                for (int i = 0; i < alice.Length; i++)
+                {
+                    searchResult = LinearSearch(dictionary, alice[i].ToLower());
+                    if (searchResult < 0)
+                    {
+                        // Tally the incorrect words | badWordCount should be 7082
+                        badWordCount++;
+                    }
+                }
+                stopWatch.Stop();
+                TimeSpan ts3 = stopWatch.Elapsed;
+                Console.WriteLine(ParseResults(0, badWordCount, ts3, false));
+                break;
+            // Similar to case #3 but using BinarySearch method, much faster
+            case 4:
+                stopWatch.Start();
+                for (int i = 0; i < alice.Length; i++)
+                {
+                    searchResult = BinarySearch(dictionary, alice[i].ToLower());
+                    if (searchResult < 0)
+                    {
+                        // Tally the incorrect words | badWordCount should be 7082
+                        badWordCount++;
+                    }
+                }
+                stopWatch.Stop();
+                TimeSpan ts4 = stopWatch.Elapsed;
+                Console.WriteLine(ParseResults(0, badWordCount, ts4, false));
+                break;
+            // Allow user to render the 'loop' variable false, ending the program
+            case 5:
+                return false;
+            // Error message
             default:
-                Console.WriteLine(-1);
+                Console.WriteLine("Invalid input, please try again");
                 break;
         }
+        return true;
     }
 
-
-    // Register if dictionary search works and *where* it was found
-    // Examle of code: printSuccessFailure(LinearSearch(dictionary, "string"));
-    public static void PrintSuccessFailure(int num)
+    // Return a string of text displaying the time the program took in 'seconds.miliseconds'
+    public static string ParseResults(int uNum, int badWordCount, TimeSpan timeSpan, bool isUserInput)
     {
-        if (num == -1)
+        // Determine if the user had input
+        if (isUserInput && uNum == -1)
         {
-            Console.WriteLine("Word not found");
+            return "Word not found.";
         }
+        else if (isUserInput && uNum != -1)
+        {
+            return $"Word found at position {uNum}. ({timeSpan.Seconds}.{timeSpan.Milliseconds} Seconds)";
+        }
+        // If not, return alice in wonderland string
         else
         {
-            Console.WriteLine($"Word found at position {num}");
+            return $"{badWordCount} words in Alice in wonderland were NOT found in the dictionary. ({timeSpan.Seconds}.{timeSpan.Milliseconds} Seconds)";
         }
     }
 
-    public static void printStringArray(String[] array, int start, int stop)
-    {
-        // Print out array elements at index values from start to stop 
-        for (int i = start; i < stop; i++)
-        {
-            Console.WriteLine(array[i]);
-        }
-    }
 
-    // Modified The Searches to utilize strings instead of integers
-    static int LinearSearch(string[] anArray, string item)
+    static int LinearSearch(string[] dictionary, string item)
     {
-        for (int i = 0; i < anArray.Length; i++)
+        for (int i = 0; i < dictionary.Length; i++)
         {
-            if (anArray[i] == item)
+            if (dictionary[i] == item)
             {
                 return i;
             }
@@ -98,24 +132,23 @@ class Program
         return -1;
     }
 
-    static int BinarySearch(string[] anArray, string item)
+    static int BinarySearch(string[] dictionary, string item)
     {
-        //Init Variables 
+        // Define Variables
         int lowerIndex = 0;
         int middleIndex;
-        int upperIndex = anArray.Length - 1;
+        int upperIndex = dictionary.Length - 1;
 
 
         while (lowerIndex <= upperIndex)
         {
             middleIndex = (lowerIndex + upperIndex) / 2;
-            int result = string.Compare(item, anArray[middleIndex]);
+            int result = string.Compare(item, dictionary[middleIndex]);
 
             if (result == 0)
             {
                 return middleIndex;
             }
-            // Error found here, need to update the method to refrence the dictionary instead of an item
             else if (result < 0)
             {
                 upperIndex = middleIndex - 1;
